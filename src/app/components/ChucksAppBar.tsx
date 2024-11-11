@@ -23,6 +23,8 @@ interface Page {
 const pages: Page[] = [
   { title: "Home", route: "/" },
   { title: "Colors", route: "/colors" },
+  { title: "Favorites", route: "/favorites" },
+  { title: "Cute Cats", route: "/cats" }
 ];
 
 function ChucksAppBar() {

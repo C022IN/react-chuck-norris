@@ -15,7 +15,7 @@ export default function Colors() {
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h1">Colors</Typography>
+          <Typography variant="h1" color="secondary" >Colors</Typography>
           <Box
             sx={{
               my: 4,
@@ -23,6 +23,7 @@ export default function Colors() {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
+              borderRadius: 2,  //rounded corners
             }}
           >
             <RandomColorGenerator />

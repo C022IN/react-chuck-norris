@@ -1,23 +1,18 @@
-// react-chuck-norris/src/RandomCatPic/components/RandomCat.tsx
 import React, { useState, useEffect } from "react";
 import { fetchRandomCatPic } from "../api/CatApi";
 import { Cat } from "../model/Cat";
 import { useRecoilState } from "recoil";
 import { favoriteCatsState } from "../state/FavoriteCatsState";
-import { Button, Box, Typography, Container } from "@mui/material";
+import { Button, Box, Typography } from "@mui/material";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import ChucksAppBar from "../../app/components/ChucksAppBar"; // Import ChucksAppBar
+import { toast } from "sonner";
 
 interface RandomCatProps {
-  showAppBar?: boolean;
   showFavoritesButton?: boolean;
 }
 
-const RandomCat: React.FC<RandomCatProps> = ({
-  showAppBar = false,
-  showFavoritesButton = false,
-}) => {
+const RandomCat: React.FC<RandomCatProps> = ({ showFavoritesButton = false }) => {
   const [catPic, setCatPic] = useState<Cat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -41,6 +36,7 @@ const RandomCat: React.FC<RandomCatProps> = ({
     if (catPic && !favorites.some((favorite) => favorite.id === catPic.id)) {
       setFavorites([...favorites, catPic]);
       setAddedToFavorites(true);
+      toast.success("Cat added to favorites!", { duration: 3000 });
       setTimeout(() => setAddedToFavorites(false), 2000);
     }
   };
@@ -50,66 +46,59 @@ const RandomCat: React.FC<RandomCatProps> = ({
   }, []);
 
   return (
-    <>
-      {showAppBar && <ChucksAppBar />}
-      <Container maxWidth="sm" sx={{ textAlign: "center", mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Random Cat Image
+    <Box sx={{ textAlign: "center" }}>
+      {isLoading ? (
+        <Typography variant="body1">Loading...</Typography>
+      ) : isError ? (
+        <Typography variant="body1" color="error">
+          Error loading cat image.
         </Typography>
-        <Box
+      ) : (
+        catPic && (
+          <img
+            src={catPic.url}
+            alt="Random Cat"
+            style={{ maxWidth: "100%", borderRadius: "8px", marginBottom: "16px" }}
+            onError={() => setIsError(true)}
+          />
+        )
+      )}
+
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
+        <Button 
+          variant="contained" 
+          onClick={loadCatPic} 
+          startIcon={<AutorenewIcon />}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            p: 3,
-            borderRadius: 2,
-            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-            bgcolor: "background.paper",
-            maxWidth: "100%",
-            margin: "auto",
+            color: "#fff",
+            bgcolor: "#3f51b5",
+            "&:hover": {
+              bgcolor: "#303f9f",
+            },
           }}
         >
-          {isLoading ? (
-            <Typography variant="body1">Loading...</Typography>
-          ) : isError ? (
-            <Typography variant="body1" color="error">
-              Error loading cat image.
-            </Typography>
-          ) : (
-            catPic && (
-              <img
-                src={catPic.url}
-                alt="Random Cat"
-                style={{ maxWidth: "100%", borderRadius: "8px", marginBottom: "16px" }}
-                onError={() => setIsError(true)}
-              />
-            )
-          )}
-          
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
-            <Button 
-                variant="contained" 
-                onClick={loadCatPic} 
-                startIcon={<AutorenewIcon />}
-            >
-              Load New Cat
-            </Button>
+          Load New Cat
+        </Button>
 
-            {showFavoritesButton && (
-              <Button
-                variant="contained"
-                color="secondary"
-                startIcon={<FavoriteIcon />}
-                onClick={addCatToFavorites}
-                disabled={addedToFavorites}
-              >
-                {addedToFavorites ? "Added to Favorites" : "Add to Favorites"}
-              </Button>
-            )}
-          </Box>
-        </Box>
-      </Container>
-    </>
+        {showFavoritesButton && (
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<FavoriteIcon />}
+            onClick={addCatToFavorites}
+            disabled={addedToFavorites}
+            sx={{
+              bgcolor: addedToFavorites ? "success.main" : "secondary.main",
+              "&:hover": {
+                bgcolor: addedToFavorites ? "success.dark" : "secondary.dark",
+              },
+            }}
+          >
+            {addedToFavorites ? "Added to Favorites" : "Add to Favorites"}
+          </Button>
+        )}
+      </Box>
+    </Box>
   );
 };
 

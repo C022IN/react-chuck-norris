@@ -1,15 +1,16 @@
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { Box, Button, Paper, Skeleton, Typography } from "@mui/material";
+import { Box, Button, Typography, Skeleton, Paper } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState } from "recoil";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { favoritesState } from "../../favorites/state/FavoriteState";
 import { getRandomJoke } from "../api/jokesApi";
 
 interface RandomJokeProps {}
 
-export const RandomJoke: React.FC<RandomJokeProps> = ({}) => {
+export const RandomJoke: React.FC<RandomJokeProps> = () => {
   const { isLoading, data, refetch } = useQuery({
     ...getRandomJoke(),
     refetchOnMount: false,
@@ -18,9 +19,12 @@ export const RandomJoke: React.FC<RandomJokeProps> = ({}) => {
 
   const [favorites, setFavorites] = useRecoilState(favoritesState);
   const [addedToFavorites, setAddedToFavorites] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState("#fffacd");
 
   const onNewJokeButton = () => {
     refetch();
+    // Alternate background color on each new joke
+    setBackgroundColor((prev) => (prev === "#fffacd" ? "#e6e6fa" : "#fffacd"));
   };
 
   const addJokeToFavorites = () => {
@@ -28,89 +32,62 @@ export const RandomJoke: React.FC<RandomJokeProps> = ({}) => {
     if (typeof currentJoke === "string" && !favorites.includes(currentJoke)) {
       setFavorites([...favorites, currentJoke]);
       setAddedToFavorites(true);
-      setTimeout(() => setAddedToFavorites(false), 2000);
+      toast.success("Joke added to favorites!");
+      setTimeout(() => setAddedToFavorites(false), 3000);
     }
   };
 
   return (
-    <Box
+    <Paper
+      elevation={3}
       sx={{
-        padding: 3,
-        bgcolor: "silver",
-        border: "2px solid",
-        borderColor: "primary.main",
-        boxShadow: 13,
+        p: 4,
+        bgcolor: backgroundColor,
         borderRadius: 2,
+        boxShadow: 3,
+        transition: "background-color 0.3s ease",
+        maxWidth: 600,
+        margin: "0 auto",
       }}
     >
-      <Paper
-        sx={{
-          padding: 2,
-          width: 600,
-          backgroundColor: "#fffacd",
-          borderRadius: 2,
-          boxShadow: 3,
-          fontFamily: "'Comic Sans MS', cursive",
-          position: "relative",
-          "&:before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "8px",
-            backgroundColor: "#fffacd",
-            borderBottom: "2px dashed #d4af37",
-            borderTopLeftRadius: "4px",
-            borderTopRightRadius: "4px",
-          },
-        }}
-      >
-        {isLoading ? (
-          <Skeleton sx={{ width: "100%" }} />
-        ) : (
-          <Typography>{data?.data.value}</Typography>
-        )}
-      </Paper>
-      <Box
-        sx={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: 2,
-          padding: 3,
-          bgcolor: "primary",
-          border: "1px solid #A9A9A9",
-          borderColor: "silver",
-          boxShadow: 13,
-          borderRadius: 2,
-        }}
-      >
-      <Box sx={{ textAlign: "center", mt: 2 }}>
-        {addedToFavorites && (
-          <Typography color="success.main">Added to Favorites!</Typography>
-        )}
-      </Box>
+      {isLoading ? (
+        <Skeleton sx={{ width: "100%" }} />
+      ) : (
+        <Typography sx={{ fontSize: "1.2rem", textAlign: "center" }}>
+          {data?.data.value}
+        </Typography>
+      )}
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
         <Button
-            onClick={onNewJokeButton}
-            variant="contained"
-            color="primary"
-            startIcon={<AutorenewIcon />}
+          onClick={onNewJokeButton}
+          variant="contained"
+          color="primary"
+          startIcon={<AutorenewIcon />}
+          sx={{
+            bgcolor: "#3f51b5",
+            "&:hover": { bgcolor: "#303f9f" },
+          }}
         >
-            Next Joke?
+          Next Joke
         </Button>
 
         <Button
-            onClick={addJokeToFavorites}
-            variant="contained"
-            color="secondary"
-            startIcon={<FavoriteIcon />}
-            disabled={addedToFavorites}
-          >
-            {addedToFavorites ? "Added to Favorites" : "Add to Favorites"}
+          onClick={addJokeToFavorites}
+          variant="contained"
+          color="secondary"
+          startIcon={<FavoriteIcon />}
+          disabled={addedToFavorites}
+          sx={{
+            bgcolor: addedToFavorites ? "success.main" : "secondary.main",
+            "&:hover": {
+              bgcolor: addedToFavorites ? "success.dark" : "secondary.dark",
+            },
+          }}
+        >
+          {addedToFavorites ? "Added to Favorites" : "Add to Favorites"}
         </Button>
       </Box>
-    </Box>
+    </Paper>
   );
 };

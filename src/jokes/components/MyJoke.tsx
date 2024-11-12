@@ -2,19 +2,31 @@ import React, { useState } from "react";
 import { Button, TextField, Box, Typography } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useRecoilState } from "recoil";
-import { favoritesState } from "../../favorites/state/FavoriteState";
+import { favoritesState, FavoriteJoke } from "../../favorites/state/FavoriteState";
+import { toast } from "sonner"; // Import toast
 
 export const MyJoke: React.FC = () => {
   const [myJoke, setMyJoke] = useState("");
   const [favorites, setFavorites] = useRecoilState(favoritesState);
 
-  // Function to add custom joke to favorites list
   const addMyJokeToFavorites = () => {
     if (myJoke.trim() === "") return;
 
-    const newJoke = { text: myJoke, isCustom: true }; // Mark joke as custom
-    setFavorites([...favorites, newJoke]);
-    setMyJoke(""); // Clear input field after adding joke
+    // Check if joke already exists in favorites
+    const jokeExists = favorites.some(
+      (favorite) =>
+        (typeof favorite === "string" && favorite === myJoke) ||
+        (typeof favorite === "object" && favorite.text === myJoke && favorite.isCustom)
+    );
+
+    if (jokeExists) {
+      toast.error("Joke already in favorites!"); // Show error toast if duplicate
+    } else {
+      const newJoke: FavoriteJoke = { text: myJoke, isCustom: true }; // Mark joke as custom
+      setFavorites([...favorites, newJoke]);
+      setMyJoke(""); // Clear input field after adding joke
+      toast.success("Joke added to favorites!"); // Show success toast
+    }
   };
 
   return (

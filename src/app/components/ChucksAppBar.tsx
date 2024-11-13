@@ -15,7 +15,7 @@ import * as React from "react";
 import { useAuth } from "../../auth/context/AuthContext";
 import Image from "next/image";
 import ChuckLogo from "/public/Chuck.jpeg";
-import ChuckyProfile from "/public/Chucky.png"; // Import Chucky.png
+import ChuckyProfile from "/public/Chucky.png"; 
 
 interface Page {
   title: string;
